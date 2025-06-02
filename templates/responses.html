@@ -1,0 +1,76 @@
+    {% extends "layout1.html" %}
+
+
+    {% block main %}
+
+
+    <div>
+        <h3>Response Statistics to: {{ form.title }}</h3><hr>
+        {% for question in questions %}
+        <div class="question-box">
+            <label class="h5 question">{{question.question}}</label>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Answer</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for response in responses %}
+                    {% if response.q_id == question.question_id %}
+                    <tr>
+                        <td>{{response.responder_name}}</td>
+                        <td>{{response.answer}}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                {% endfor %}
+                </tbody>
+            </table> 
+
+            {% if question.answer_type == "radio" %}
+                <!-- {% for option in option_answer_count %}
+                    {% if option.question_id == question.question_id %}
+                        <p>{{option.option}}----{{option.count}}</p>
+                    {% endif %}
+                {% endfor %} -->
+
+                <div id="chartsContainer-{{question.question_id}}" class="canvas" ></div>
+
+                 
+
+
+            {% endif %}
+        </div>
+        {% endfor %}
+
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let options = {{ option_answer_count | tojson }};
+        let Questions= {{ questions | tojson}}
+
+        Questions.forEach(function(Question){
+            if (Question.answer_type !== "text"){
+                let filteredOptions = options.filter(option => option.question_id === Question.question_id);
+                if (filteredOptions.length > 0) {
+                    let labels = filteredOptions.map(option => option.option);
+                    let data = filteredOptions.map(option => option.count);
+                    let backgroundColors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'];
+
+                    let canvas = document.createElement('canvas');
+                    document.getElementById(`chartsContainer-${Question.question_id}`).appendChild(canvas);
+
+                    new Chart(canvas.getContext('2d'), {
+                        type: 'pie',
+                        data: {labels: labels, datasets: [{data: data,backgroundColor: backgroundColors.slice(0, labels.length)}]},
+                        options: {plugins: {title: {display: true,text: "Chart"}}}
+                    });
+                }
+            }
+        });
+    </script>
+
+    {% endblock %}

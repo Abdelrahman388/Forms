@@ -1,0 +1,35 @@
+{% extends "layout2.html" %}
+
+{% block main %}
+
+<div>
+    <h3>{{ form.title }}</h3><hr>
+    <form action="/respond/{{form.form_id}}" method="post">
+        <div class="question-box">
+            <label class="h5 question">What is your Full name ?</label>
+            <input type="text" name="name" auutocomplete="on" autofocus required> 
+        </div>
+        {% for question in questions %}
+        <div class="question-box">
+            <label class="h5 question">{{question.question}}</label>
+            {% if question.answer_type == "text" %}
+                <input autofocus  type="text" name ="{{question.question_id}}" required >
+            {% else %}
+                {% for option in options %}
+                    {% if option.q_id == question.question_id %}
+                    <div class="mb-0">
+                        <input name="{{question.question_id}}" value="{{option.option}}" type="{{question.answer_type}}" id="opt{{option.option_id}}">
+                        <label for="opt{{option.option_id}}">{{option.option}}</label>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </div>
+        {% endfor %}
+        <input type="hidden" name="form_id" value="{{form.form_id}}">
+        <button class="btn btn-danger" type="submit">Submit</button>
+    </form>
+
+</div>
+
+{% endblock %}

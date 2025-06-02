@@ -1,0 +1,39 @@
+{% extends "layout1.html" %}
+
+
+{% block main %}
+
+<div class="container">
+    <div class="section">
+        <form action="/login" method="post">
+            <div class="mb-3">
+                <input class="form-control mx-auto w-auto" autofocus autocomplete="off" placeholder="Username" name="username" type="text">
+            </div>
+            <div class="mb-3">
+                <input id="pass" class="form-control mx-auto w-auto" autofocus autocomplete="off" placeholder="Password" name="password" type="password">
+                <input id="check" type="checkbox" title="Show Password">
+                <label for="check">Show Password</label>
+            </div>
+            <div class="mb-3">
+                <button class="btn btn-dark" type="submit">log in</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    let check =document.getElementById("check");
+    let pass1 =document.getElementById("pass");
+    check.addEventListener('click',function(){
+        if (pass.type === 'password' )
+        {
+            pass.type='text';
+        }
+        else
+        {  
+            pass.type='password';
+        }
+    });
+
+</script>
+
+{% endblock %}

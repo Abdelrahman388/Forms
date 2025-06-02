@@ -1,0 +1,50 @@
+{% extends "layout1.html" %}
+
+
+{% block main %}
+<div class="container">
+    <div class="section">
+        <form action="/create" method="get">
+            <button type="submit">Create Form</button>
+        </form>
+    </div>
+    <div class="section">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Title</th>
+                    <th>Date</th>
+                    <th>Responses</th>
+                    <th>Link</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for form in forms %}
+                <tr>
+                    <td><a href="/create" method="get">{{form.name}}<input name="form_id" type="hidden" value="{{form.form_id}}"></a></td>
+                    <td>{{form.title}}</td>
+                    <td>{{form.datetime_created}}</td>
+                    <td>{{form.responses_no}}</td>
+                    <td><a href="/respond/{{form.form_id}}">form link</a></td>
+                    <td>
+                        <form action="/responses_statistics/{{form.form_id}}" method="get">
+                            <input name="form_id" type="hidden" value="{{form.form_id}}">
+                            <button>View Data</button>
+                        </form>
+                        <br>
+                        <form action="/delete" method="post">
+                            <input name="form_id" type="hidden" value="{{form.form_id}}">
+                            <button type="submit">Delete Form</button>
+                        </form>
+                    </td>
+
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

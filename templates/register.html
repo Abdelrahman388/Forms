@@ -1,0 +1,44 @@
+{% extends "layout1.html" %}
+
+
+{% block main %}
+
+<div class="container">
+    <div class="section">
+        <form action="/register" method="post">
+            <div class="mb-3">
+                <input class="form-control mx-auto w-auto" autofocus autocomplete="off" placeholder="Username" name="username" type="text" required>
+            </div>
+            <div class="mb-3">
+                <input id="pass1" class="form-control mx-auto w-auto" autofocus autocomplete="off" placeholder="Password" name="password" type="password" required>
+            </div>
+            <div class="mb-3">
+                <input id="pass2" class="form-control mx-auto w-auto" autofocus autocomplete="off" placeholder="Confirm Password" name="confirmation" type="password" required>
+                <input id="check" type="checkbox"><lable> Show Password</lable>
+            </div>
+            <div class="mb-3">
+                <button class="btn btn-danger" type="submit">Register</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    let check =document.getElementById("check");
+    let pass1 =document.getElementById("pass1");
+    let pass2 =document.getElementById("pass2");
+    check.addEventListener('click',function(){
+        if (pass1.type === 'password' && pass2.type=== 'password')
+        {
+            pass1.type='text';
+            pass2.type='text';
+        }
+        else
+        {  
+            pass1.type='password';
+            pass2.type='password';
+        }
+    });
+
+</script>
+
+{% endblock %}
