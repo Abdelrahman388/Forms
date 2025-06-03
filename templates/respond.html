@@ -1,35 +1,149 @@
-{% extends "layout2.html" %}
+{% extends "layout1.html" %}
+
+{% block title %}{{ form.title }}{% endblock %}
 
 {% block main %}
-
-<div>
-    <h3>{{ form.title }}</h3><hr>
-    <form action="/respond/{{form.form_id}}" method="post">
-        <div class="question-box">
-            <label class="h5 question">What is your Full name ?</label>
-            <input type="text" name="name" auutocomplete="on" autofocus required> 
+<div class="container">
+    <!-- Form Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h1 class="card-title">{{ form.title }}</h1>
+                    <p class="card-text">Please fill out this form completely and accurately.</p>
+                </div>
+            </div>
         </div>
-        {% for question in questions %}
-        <div class="question-box">
-            <label class="h5 question">{{question.question}}</label>
-            {% if question.answer_type == "text" %}
-                <input autofocus  type="text" name ="{{question.question_id}}" required >
-            {% else %}
-                {% for option in options %}
-                    {% if option.q_id == question.question_id %}
-                    <div class="mb-0">
-                        <input name="{{question.question_id}}" value="{{option.option}}" type="{{question.answer_type}}" id="opt{{option.option_id}}">
-                        <label for="opt{{option.option_id}}">{{option.option}}</label>
+    </div>
+
+    <!-- Form Content -->
+    <form id="response-form">
+        <input type="hidden" name="form_id" value="{{ form.form_id }}">
+        
+        <!-- Name Question -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-person-fill text-primary"></i> What is your full name?
+                            <span class="text-danger">*</span>
+                        </h5>
+                        <div class="form-floating">
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="name" 
+                                   name="name" 
+                                   required 
+                                   placeholder="Enter your full name">
+                            <label for="name">Your Full Name</label>
+                        </div>
                     </div>
-                    {% endif %}
-                {% endfor %}
-            {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Questions -->
+        {% for question in questions %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-question-circle text-info"></i> 
+                            {{ question.question }}
+                            <span class="text-danger">*</span>
+                        </h5>
+                        
+                        {% if question.answer_type == "text" %}
+                        <div class="form-floating">
+                            <textarea class="form-control" 
+                                      id="q{{ question.question_id }}" 
+                                      name="{{ question.question_id }}" 
+                                      required 
+                                      placeholder="Enter your answer"
+                                      style="height: 100px"></textarea>
+                            <label for="q{{ question.question_id }}">Your Answer</label>
+                        </div>
+                        
+                        {% else %}
+                        <div class="mt-3">
+                            {% for option in options %}
+                                {% if option.q_id == question.question_id %}
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" 
+                                           type="{{ question.answer_type }}" 
+                                           name="{{ question.question_id }}" 
+                                           value="{{ option.option }}" 
+                                           id="opt{{ option.option_id }}"
+                                           {% if question.answer_type == "radio" %}required{% endif %}>
+                                    <label class="form-check-label" for="opt{{ option.option_id }}">
+                                        {{ option.option }}
+                                    </label>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         </div>
         {% endfor %}
-        <input type="hidden" name="form_id" value="{{form.form_id}}">
-        <button class="btn btn-danger" type="submit">Submit</button>
+
+        <!-- Submit Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-success">
+                    <div class="card-body text-center">
+                        <h5 class="card-title text-success">
+                            <i class="bi bi-check-circle"></i> Ready to Submit?
+                        </h5>
+                        <p class="card-text text-muted">
+                            Please review your answers before submitting. You cannot edit them after submission.
+                        </p>
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="bi bi-send"></i> Submit Form
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </form>
 
+    <!-- Footer Info -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-info">
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <i class="bi bi-shield-check text-success"></i>
+                            <h6 class="mt-2">Secure</h6>
+                            <small class="text-muted">Your data is protected</small>
+                        </div>
+                        <div class="col-md-4">
+                            <i class="bi bi-clock text-primary"></i>
+                            <h6 class="mt-2">Quick</h6>
+                            <small class="text-muted">Takes just a few minutes</small>
+                        </div>
+                        <div class="col-md-4">
+                            <i class="bi bi-star text-warning"></i>
+                            <h6 class="mt-2">Important</h6>
+                            <small class="text-muted">Your response matters</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
+<script>
+    // Initialize form data for JavaScript
+    window.formData = {
+        form_id: {{ form.form_id }},
+        questions: {{ questions | tojson }}
+    };
+</script>
 {% endblock %}

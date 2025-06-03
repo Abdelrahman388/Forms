@@ -1,44 +1,75 @@
 {% extends "layout1.html" %}
 
+{% block title %}Register - Form Creator{% endblock %}
 
 {% block main %}
-
 <div class="container">
-    <div class="section">
-        <form action="/register" method="post">
-            <div class="mb-3">
-                <input class="form-control mx-auto w-auto" autofocus autocomplete="off" placeholder="Username" name="username" type="text" required>
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">Register</h2>
+                    
+                    <form method="post">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.username.label(class="form-label") }}
+                            {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else "")) }}
+                            {% if form.username.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.username.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.password.label(class="form-label") }}
+                            <div class="input-group">
+                                {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""), id="password-input") }}
+                                <button class="btn btn-outline-secondary" type="button" id="toggle-password">
+                                    <i class="bi bi-eye" id="toggle-icon">👁️</i>
+                                </button>
+                            </div>
+                            {% if form.password.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.password.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.confirmation.label(class="form-label") }}
+                            <div class="input-group">
+                                {{ form.confirmation(class="form-control" + (" is-invalid" if form.confirmation.errors else ""), id="confirmation-input") }}
+                                <button class="btn btn-outline-secondary" type="button" id="toggle-confirmation">
+                                    <i class="bi bi-eye" id="toggle-confirmation-icon">👁️</i>
+                                </button>
+                            </div>
+                            {% if form.confirmation.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.confirmation.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-danger">Register</button>
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        <p class="mb-0">Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a></p>
+                    </div>
+                </div>
             </div>
-            <div class="mb-3">
-                <input id="pass1" class="form-control mx-auto w-auto" autofocus autocomplete="off" placeholder="Password" name="password" type="password" required>
-            </div>
-            <div class="mb-3">
-                <input id="pass2" class="form-control mx-auto w-auto" autofocus autocomplete="off" placeholder="Confirm Password" name="confirmation" type="password" required>
-                <input id="check" type="checkbox"><lable> Show Password</lable>
-            </div>
-            <div class="mb-3">
-                <button class="btn btn-danger" type="submit">Register</button>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
-<script>
-    let check =document.getElementById("check");
-    let pass1 =document.getElementById("pass1");
-    let pass2 =document.getElementById("pass2");
-    check.addEventListener('click',function(){
-        if (pass1.type === 'password' && pass2.type=== 'password')
-        {
-            pass1.type='text';
-            pass2.type='text';
-        }
-        else
-        {  
-            pass1.type='password';
-            pass2.type='password';
-        }
-    });
-
-</script>
-
 {% endblock %}

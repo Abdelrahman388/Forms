@@ -1,76 +1,150 @@
-    {% extends "layout1.html" %}
+{% extends "layout1.html" %}
 
+{% block title %}Response Statistics - {{ form.title }}{% endblock %}
 
-    {% block main %}
-
-
-    <div>
-        <h3>Response Statistics to: {{ form.title }}</h3><hr>
-        {% for question in questions %}
-        <div class="question-box">
-            <label class="h5 question">{{question.question}}</label>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Answer</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for response in responses %}
-                    {% if response.q_id == question.question_id %}
-                    <tr>
-                        <td>{{response.responder_name}}</td>
-                        <td>{{response.answer}}</td>
-                        <td></td>
-                    </tr>
-                    {% endif %}
-                {% endfor %}
-                </tbody>
-            </table> 
-
-            {% if question.answer_type == "radio" %}
-                <!-- {% for option in option_answer_count %}
-                    {% if option.question_id == question.question_id %}
-                        <p>{{option.option}}----{{option.count}}</p>
-                    {% endif %}
-                {% endfor %} -->
-
-                <div id="chartsContainer-{{question.question_id}}" class="canvas" ></div>
-
-                 
-
-
-            {% endif %}
+{% block main %}
+<div class="container">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h3">Response Statistics</h1>
+            <p class="text-muted">{{ form.title }}</p>
         </div>
-        {% endfor %}
-
+        <div class="col-md-4 text-end">
+            <div class="card border-info">
+                <div class="card-body text-center">
+                    <h3 class="card-title text-info mb-0">{{ form.responses_no or 0 }}</h3>
+                    <small class="text-muted">Total Responses</small>
+                </div>
+            </div>
+        </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        let options = {{ option_answer_count | tojson }};
-        let Questions= {{ questions | tojson}}
 
-        Questions.forEach(function(Question){
-            if (Question.answer_type !== "text"){
-                let filteredOptions = options.filter(option => option.question_id === Question.question_id);
-                if (filteredOptions.length > 0) {
-                    let labels = filteredOptions.map(option => option.option);
-                    let data = filteredOptions.map(option => option.count);
-                    let backgroundColors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'];
+    <!-- Questions and Statistics -->
+    {% for question in questions %}
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-question-circle text-info"></i>
+                        {{ question.question }}
+                    </h5>
+                    <small class="text-muted">
+                        Answer Type: 
+                        <span class="badge bg-secondary">{{ question.answer_type.title() }}</span>
+                    </small>
+                </div>
+                <div class="card-body">
+                    <!-- Response Table -->
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h6>Individual Responses</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Respondent</th>
+                                            <th>Answer</th>
+                                            <th>Submitted</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for response in responses %}
+                                            {% if response.q_id == question.question_id %}
+                                            <tr>
+                                                <td>
+                                                    <i class="bi bi-person-fill text-muted"></i>
+                                                    {{ response.responder_name }}
+                                                </td>
+                                                <td>
+                                                    {% if question.answer_type == "text" %}
+                                                        <span class="text-wrap">{{ response.answer }}</span>
+                                                    {% else %}
+                                                        <span class="badge bg-primary">{{ response.answer }}</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <small class="text-muted">
+                                                        {{ response.datetime_created.strftime('%Y-%m-%d %H:%M') if response.datetime_created else 'N/A' }}
+                                                    </small>
+                                                </td>
+                                            </tr>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Chart Section -->
+                        {% if question.answer_type != "text" %}
+                        <div class="col-md-4">
+                            <h6>Response Distribution</h6>
+                            <div class="chart-container">
+                                <div id="chartsContainer-{{ question.question_id }}" style="height: 300px;">
+                                    <canvas id="chart-{{ question.question_id }}"></canvas>
+                                </div>
+                            </div>
+                            
+                            <!-- Statistics Summary -->
+                            <div class="mt-3">
+                                <h6>Summary</h6>
+                                {% set option_stats = [] %}
+                                {% for option in option_answer_count %}
+                                    {% if option.question_id == question.question_id %}
+                                        {% set _ = option_stats.append(option) %}
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if option_stats %}
+                                    {% for stat in option_stats %}
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <small class="text-truncate">{{ stat.option }}</small>
+                                        <span class="badge bg-info">{{ stat.count }}</span>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <small class="text-muted">No responses yet</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
 
-                    let canvas = document.createElement('canvas');
-                    document.getElementById(`chartsContainer-${Question.question_id}`).appendChild(canvas);
+    <!-- Navigation -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-secondary">
+                <div class="card-body text-center">
+                    <a href="{{ url_for('main.index') }}" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-left"></i> Back to Dashboard
+                    </a>
+                    <a href="{{ url_for('builder.create', form_id=form.form_id) }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-pencil"></i> Edit Form
+                    </a>
+                    <a href="{{ url_for('respond.respond', form_id=form.form_id) }}" class="btn btn-outline-success">
+                        <i class="bi bi-eye"></i> Preview Form
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-                    new Chart(canvas.getContext('2d'), {
-                        type: 'pie',
-                        data: {labels: labels, datasets: [{data: data,backgroundColor: backgroundColors.slice(0, labels.length)}]},
-                        options: {plugins: {title: {display: true,text: "Chart"}}}
-                    });
-                }
-            }
-        });
-    </script>
-
-    {% endblock %}
+<script>
+    // Pass data to JavaScript for chart rendering
+    window.questions = {{ questions | tojson }};
+    window.optionAnswerCount = {{ option_answer_count | tojson }};
+    window.formData = {
+        form_id: {{ form.form_id }},
+        title: "{{ form.title }}",
+        responses_count: {{ form.responses_no or 0 }}
+    };
+</script>
+{% endblock %}

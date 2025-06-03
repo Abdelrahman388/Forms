@@ -1,50 +1,149 @@
 {% extends "layout1.html" %}
 
+{% block title %}Dashboard - Forms{% endblock %}
 
 {% block main %}
 <div class="container">
-    <div class="section">
-        <form action="/create" method="get">
-            <button type="submit">Create Form</button>
-        </form>
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h3">My Forms</h1>
+            <p class="text-muted">Create and manage your forms</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ url_for('builder.create') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Create New Form
+            </a>
+        </div>
     </div>
-    <div class="section">
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Title</th>
-                    <th>Date</th>
-                    <th>Responses</th>
-                    <th>Link</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for form in forms %}
-                <tr>
-                    <td><a href="/create" method="get">{{form.name}}<input name="form_id" type="hidden" value="{{form.form_id}}"></a></td>
-                    <td>{{form.title}}</td>
-                    <td>{{form.datetime_created}}</td>
-                    <td>{{form.responses_no}}</td>
-                    <td><a href="/respond/{{form.form_id}}">form link</a></td>
-                    <td>
-                        <form action="/responses_statistics/{{form.form_id}}" method="get">
-                            <input name="form_id" type="hidden" value="{{form.form_id}}">
-                            <button>View Data</button>
-                        </form>
-                        <br>
-                        <form action="/delete" method="post">
-                            <input name="form_id" type="hidden" value="{{form.form_id}}">
-                            <button type="submit">Delete Form</button>
-                        </form>
-                    </td>
 
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+    <!-- Forms List -->
+    {% if forms %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Form Name</th>
+                                    <th>Title</th>
+                                    <th>Created</th>
+                                    <th>Responses</th>
+                                    <th>Questions</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for form in forms %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('builder.create', form_id=form.form_id) }}" 
+                                           class="text-decoration-none fw-medium">
+                                            {{ form.name }}
+                                        </a>
+                                    </td>
+                                    <td>{{ form.title }}</td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {{ form.datetime_created.strftime('%Y-%m-%d %H:%M') if form.datetime_created else 'N/A' }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ form.responses_no or 0 }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ form.question_count or 0 }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('respond.respond', form_id=form.form_id) }}" 
+                                               class="btn btn-outline-success btn-sm" 
+                                               title="View Form">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{{ url_for('builder.create', form_id=form.form_id) }}" 
+                                               class="btn btn-outline-primary btn-sm" 
+                                               title="Edit Form">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="{{ url_for('respond.responses_statistics', form_id=form.form_id) }}" 
+                                               class="btn btn-outline-info btn-sm" 
+                                               title="View Statistics">
+                                                <i class="bi bi-bar-chart"></i>
+                                            </a>
+                                            <button type="button" 
+                                                    class="btn btn-outline-danger btn-sm delete-form-btn" 
+                                                    data-form-id="{{ form.form_id }}"
+                                                    title="Delete Form">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+    
+    <!-- Quick Actions Card -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-info">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-lightbulb text-info"></i> Quick Actions
+                    </h5>
+                    <p class="card-text">Manage your forms efficiently with these shortcuts:</p>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-plus-circle text-primary me-2"></i>
+                                <span>Click "Create New Form" to start building</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-eye text-success me-2"></i>
+                                <span>Use the eye icon to preview forms</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-bar-chart text-info me-2"></i>
+                                <span>View response statistics and charts</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0">
+                <div class="card-body text-center py-5">
+                    <div class="mb-4">
+                        <i class="bi bi-file-earmark-plus text-muted" style="font-size: 4rem;"></i>
+                    </div>
+                    <h3 class="text-muted">No Forms Yet</h3>
+                    <p class="text-muted mb-4">
+                        Get started by creating your first form. It's easy and takes just a few minutes!
+                    </p>
+                    <a href="{{ url_for('builder.create') }}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-plus-circle"></i> Create Your First Form
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
-
 {% endblock %}
