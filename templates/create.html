@@ -8,11 +8,11 @@
         <div class="mb-3">
             <form id="create" action="/create" method="post">
                 <div class="mb-3 inline-block">
-                    <input id="name" class="form-control mx-auto w-auto inline-block" value="{{form[0].name}}" autofocus autocomplete="off" type="text" name="name" required>
+                    <input id="name" class="form-control mx-auto w-auto inline-block" value="{{form[0].name}}" autofocus autocomplete="off" type="text" name="name" required title="Enter Form name" placeholder="Enter Form name">
                     <label> Enter Form name</label>
                 </div>
                 <div class="ms-3 mb-3 inline-block">
-                    <input id="title" class="form-control mx-auto w-auto inline-block" value="{{form[0].title}}" autofocus autocomplete="off" type="text" name="title" required >
+                    <input id="title" class="form-control mx-auto w-auto inline-block" value="{{form[0].title}}" autofocus autocomplete="off" type="text" name="title" required title="Enter Form title" placeholder="Enter Form title">
                     <label> Enter Form title (NOTE: this will appear to responders)</label>
                 </div>
                 <input type="hidden" name="form_id" value="{{form[0].form_id}}">
@@ -27,10 +27,10 @@
                  
         <div class="mb-3 inline-block ps-3">
             <label class="switch">
-                <input id="swtch" type="checkbox">
+                <input id="swtch" type="checkbox" title="Restrict to one response per person">
                 <span class="slider round"></span>
             </label>
-            <label for="swtch inline-block"> Restrict to one response per person</label>
+            <label for="swtch" class="inline-block"> Restrict to one response per person</label>
         </div>
         <!-- <div class="mb-3">
             <form action="/addpage" method="">
@@ -119,7 +119,7 @@
                     {% if savedoption.q_id == emptyquestion.question_id %}
                     <div class="mb-3">
                         <form action="/deleteoption" method="post">
-                            <input name="{{emptyquestion.answer_type}}" disabled type="{{emptyquestion.answer_type}}"><label>{{ savedoption.option }}</label>
+                            <input name="{{emptyquestion.answer_type}}" disabled type="{{emptyquestion.answer_type}}" title="Answer option" placeholder="Answer option"><label>{{ savedoption.option }}</label>
                             <input type="hidden" name="qid" value="{{emptyquestion.question_id}}">
                             <input type="hidden" name="oid" value="{{savedoption.option_id}}">
                             <button class="btn btn-sm btn-warning " type="submit">Delete Option</button>
