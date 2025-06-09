@@ -1,239 +1,388 @@
 {% extends "layout1.html" %}
 
-
 {% block main %}
-<div class="container">
 
-    <div class="section sticky">
-        <div class="mb-3">
-            <form id="create" action="/create" method="post">
-                <div class="mb-3 inline-block">
-                    <input id="name" class="form-control mx-auto w-auto inline-block" value="{{form[0].name}}" autofocus autocomplete="off" type="text" name="name" required title="Enter Form name" placeholder="Enter Form name">
-                    <label> Enter Form name</label>
-                </div>
-                <div class="ms-3 mb-3 inline-block">
-                    <input id="title" class="form-control mx-auto w-auto inline-block" value="{{form[0].title}}" autofocus autocomplete="off" type="text" name="title" required title="Enter Form title" placeholder="Enter Form title">
-                    <label> Enter Form title (NOTE: this will appear to responders)</label>
-                </div>
-                <input type="hidden" name="form_id" value="{{form[0].form_id}}">
-            </form>
-        </div>
-        <div class="mb-3 inline-block ps-5">
-            <form action="/addquestion" method="post">
-                <input type="hidden" name="form_id" value="{{form[0].form_id}}">
-                <button id="addq" type="submit">Add Question</button>
-            </form>
-        </div>
-                 
-        <div class="mb-3 inline-block ps-3">
-            <label class="switch">
-                <input id="swtch" type="checkbox" title="Restrict to one response per person">
-                <span class="slider round"></span>
-            </label>
-            <label for="swtch" class="inline-block"> Restrict to one response per person</label>
-        </div>
-        <!-- <div class="mb-3">
-            <form action="/addpage" method="">
-                <button type="submit">Add page</button>
-            </form>
-        </div> -->
-    </div>
-    <div class="section">
-
-        {% for writtenquestion in writtenquestions %}
-
-        <div class="question-box">
-            <div class="mb-3">
-                <label class="h5 question">{{writtenquestion.question}}</label>
-                {% if writtenquestion.answer_type == "text" %}
-                <div class="mb-3">
-                    <input type="text" disabled placeholder="Answer" title="Answer">
-                </div>
-                {% else %}
-                    {% for savedoption in savedoptions %}
-                        {% if savedoption.q_id == writtenquestion.question_id %}
-                        <div class="mb-0">
-                            <input name="{{writtenquestion.answer_type}}" disabled type="{{writtenquestion.answer_type}}" title="Answer option"><label>{{ savedoption.option }}</label>
-                        </div>
-                        {% endif %}
-                    {% endfor %}
-                {% endif %}
-            </div>
-            <div class="mb-0 inline-block">
-                <div class="mb-3 inline-block">
-                    <form action="/deletequestion" method="post">
-                        <input type="hidden" name="form_id" value="{{form[0].form_id}}">
-                        <input type="hidden" name="qid" value="{{writtenquestion.question_id}}">
-                        <button type="submit"> Delete </button>
-                    </form>
-                </div>
-                <div class="mb-0 inline-block">
-                    <form action="/editquestion" method="post">
-                        <input type="hidden" name="form_id" value="{{form[0].form_id}}">
-                        <input type="hidden" name="qid" value="{{writtenquestion.question_id}}">
-                        <button type="submit"> Edit </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        {% endfor%}
-    </div>
-    <div class="section">
-
-        {% for emptyquestion in emptyquestions %}
-
-        <input id="id{{emptyquestion.question_id}}" type="hidden" value="{{emptyquestion.question_id}}">
-
-        <div class="section">
-            <form action="/writequestion" method="post">
-                <div class="mb-3">
-                    <div class="inline-block">
-                        <input id="question{{emptyquestion.question_id}}" class="form-control mx-auto w-75 inline-block" {% if emptyquestion.question != "" %} value="{{emptyquestion.question}}" {% endif %} autofocus autocomplete="off" type="text" placeholder="Write a Question" name="question">
-                    </div>
-                    <div class="inline-block ps-5">
-                        <label for="answer-type{{emptyquestion.question_id}}" class="visually-hidden">Answer type</label>
-                        <select id="answer-type{{emptyquestion.question_id}}" class="form-select-sm" name="answer-type" aria-label="Answer type">
-                            <option disabled {% if emptyquestion.answer_type == "" %} selected {% endif %} value="">Answer type</option>
-                            <option value="text"  {% if emptyquestion.answer_type == "text" %} selected {% endif %} >text</option>
-                            <option value="radio" {% if emptyquestion.answer_type == "radio" %} selected {% endif %} >radio</option>
-                            <option value="checkbox" {% if emptyquestion.answer_type == "checkbox" %} selected {% endif %} >checkbox</option>
-                        </select>
-                    </div>
-                    <div class="inline-block ps-5">
-                        <input type="hidden" name="form_id" value="{{form[0].form_id}}">
-                        <input type="hidden" name="qid" value="{{emptyquestion.question_id}}">
-                        <button class="btn btn-dark" type="submit">Save</button>   
-                    </div>
-                </div>
-            </form>
-            <form id="update{{emptyquestion.question_id}}" action = "/updatequestion" method="post"> 
-                <input id = "type{{emptyquestion.question_id}}" type="hidden" name = "type_" >
-                <input id = "question_text{{emptyquestion.question_id}}" type="hidden" name="question_text">
-                <input type="hidden" name="form_id" value="{{form[0].form_id}}">
-                <input type="hidden" name="qid" value="{{emptyquestion.question_id}}">
-            </form>
-
-            <div class="mb-3">
-                {% for savedoption in savedoptions %}
-                    {% if savedoption.q_id == emptyquestion.question_id %}
-                    <div class="mb-3">
-                        <form action="/deleteoption" method="post">
-                            <input name="{{emptyquestion.answer_type}}" disabled type="{{emptyquestion.answer_type}}" title="Answer option" placeholder="Answer option"><label>{{ savedoption.option }}</label>
-                            <input type="hidden" name="qid" value="{{emptyquestion.question_id}}">
-                            <input type="hidden" name="oid" value="{{savedoption.option_id}}">
-                            <button class="btn btn-sm btn-warning " type="submit">Delete Option</button>
-                        </form>
-                    </div>
-                    {% endif %}
-                {% endfor%}
-            
-                {% for emptyoption in emptyoptions %}
-                    {% if emptyoption.q_id == emptyquestion.question_id %}
-                    <div class="mb-3">
-                        <form action="/saveoption" method="post">
-                            <input name="option" class="form-control mx-auto w-25 " type="text" placeholder="Write Option" autofocus autocomplete="off" required> 
-                            <input type="hidden" name="qid" value="{{emptyquestion.question_id}}">
-                            <input type="hidden" name="oid" value="{{emptyoption.option_id}}">
-                            <input type="submit" hidden>
-                        </form>
-                    </div>
-                    {% endif %}
-                {% endfor %}
-            </div>
-            <div id="answer{{emptyquestion.question_id}}" class="mb-3">
-
-            </div>
-
-        </div>
-
-        {% endfor%}
-    </div>
-    
-
-    <div class="mb-5">
-            <button id="create_button" class="btn btn-info" >Create Form</button>
-    </div> 
-
-
-
+<!-- Floating Vertical Action Bar -->
+<div id="floating-action-bar" class="vertical-action-bar">
+  <div class="action-button-container">
+    <button id="add-question-btn" class="action-button action-button-primary mb-3" title="Add Question">
+      <i class="bi bi-plus-circle"></i>
+      <span class="action-text">Add Question</span>
+    </button>
+    <button id="create-form-btn" class="action-button action-button-success" title="Save Form">
+      <i class="bi bi-check-circle"></i>
+      <span class="action-text">Save Form</span>
+    </button>
+  </div>
 </div>
+
+<div class="container" style="max-width: 1100px;">
+  <!-- Form Header Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h6 class="mb-0">Details</h6>
+        </div>
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-md-4">
+              <div class="form-floating mb-3">
+                <input id="form-name" class="form-control w-100" type="text" name="name" required placeholder="">
+                <label for="form-name">Form Name (for creator)</label>
+              </div>
+            </div>
+            <div class="col-md-8">
+              <div class="form-floating mb-3">
+                <input id="form-title" class="form-control w-100" type="text" name="title" required placeholder="">
+                <label for="form-title">Form Title (shown to responders)</label>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-floating mb-3">
+                <textarea id="form-description" class="form-control" style="height: 100px;" name="description" placeholder=""></textarea>
+                <label for="form-description">Form Description (shown to responders)</label>
+              </div>
+              <!-- <div class="form-check form-switch">
+                <input id="form-restrict" class="form-check-input" type="checkbox">
+                <label class="form-check-label" for="form-restrict">
+                  Restrict to one response per person
+                </label>
+              </div> -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Questions Section -->
+  <div id="questions-container"></div>
+
+  <div id="no-questions-message" class="row">
+    <div class="col-12">
+      <div class="card border-info">
+        <div class="card-body text-center">
+          <h5 class="card-title text-muted">No Questions Yet</h5>
+          <p class="card-text">Click "Add Question" to start building your form.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<link rel="stylesheet" href="static/css/action_bar.css">
+
+
+
 <script>
+let questions = [];
+let questionIdCounter = 1;
+let questionCounter = 1;
 
-    let empty_questions={{ emptyquestions | tojson}}
+// Use form-specific sessionStorage key based on form ID
 
+const formId = {{ form_data | safe }}.form_id || 'new';
+const SESSION_STORAGE_KEY = `draftForm_${formId}`;
+
+const sessionFormData = JSON.parse(sessionStorage.getItem(SESSION_STORAGE_KEY) || 'null');
+const existingFormData = {{ form_data | safe }};
+
+// Clear old draft sessions when switching forms
+function clearOtherFormSessions() {
+  const keys = Object.keys(sessionStorage);
+  keys.forEach(key => {
+    if (key.startsWith('draftForm_') && key !== SESSION_STORAGE_KEY) {
+      sessionStorage.removeItem(key);
+    }
+  });
+}
+
+// Clear other form sessions when loading a different form
+clearOtherFormSessions();
+
+if (sessionFormData) {
+  restoreFormFromSession(sessionFormData);
+} else if (existingFormData && existingFormData.questions.length > 0) {
+  restoreFormFromSession(existingFormData);
+}
+
+
+function restoreFormFromSession(data) {
+  document.getElementById('form-name').value = data.name || '';
+  document.getElementById('form-title').value = data.title || '';
+  document.getElementById('form-description').value = data.description || '';
+  // document.getElementById('form-restrict').checked = !!data.restrict;
+
+  questions = data.questions.map(q => {
+    const question = {
+      id: q.id,
+      text: q.text,
+      answerType: q.answerType,
+      options: q.options || null
+    };
+    renderQuestion(question);
+    return question;
+  });
+
+  questionIdCounter = Math.max(...questions.map(q => q.id)) + 1;
+  updateNoQuestionsMessage();
+
+  saveToSession();
+}
+
+function saveToSession() {
+  const formName = document.getElementById('form-name').value.trim();
+  const formTitle = document.getElementById('form-title').value.trim();
+  const formDescription = document.getElementById('form-description').value.trim();
+  // const restrict = document.getElementById('form-restrict').checked;
+
+  const formData = {
+    form_id: formId,
+    name: formName,
+    title: formTitle,
+    description: formDescription,
+    // restrict: restrict,
+    questions: questions
+  };
+
+  sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(formData));
+}
+
+function clearSession() {
+  sessionStorage.removeItem(SESSION_STORAGE_KEY);
+}
+
+document.getElementById('form-name').addEventListener('input', saveToSession);
+document.getElementById('form-title').addEventListener('input', saveToSession);
+document.getElementById('form-description').addEventListener('input', saveToSession);
+// document.getElementById('form-restrict').addEventListener('change', saveToSession);
+
+
+
+function updateNoQuestionsMessage() {
+  document.getElementById('no-questions-message').classList.toggle('d-none', questions.length > 0);
+}
+
+function createOptionHTML(qid, optionIndex) {
+  return `
+    <div class="input-group mb-2" data-option-index="${optionIndex}" style="max-width: 600px;">
+      <input type="text" class="form-control option-input w-90" placeholder="Option text">
+      <button class="btn btn-outline-danger remove-option-btn" type="button">
+        <i class="bi bi-x"></i>
+      </button>
+    </div>
+  `;
+}
+
+function renderQuestion(question) {
+  const container = document.createElement('div');
+  container.className = 'row mb-4';
+  container.innerHTML = `
+    <div class="col-12">
+      <div class="card shadow-sm" data-qid="${question.id}">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h6 class="mb-0">Question ${questionCounter}</h6>
+          <div class="btn-group btn-group-sm">
+            <button class="btn btn-outline-secondary add-option-btn" style="display:none;" title="Add Option"><i class="bi bi-plus-circle"> Add Option</i></button>
+            <button class="btn btn-outline-danger delete-btn" title="Delete Question"><i class="bi bi-trash"></i></button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-8">
+              <div class="form-floating mb-3">
+                <input type="text" class="form-control question-text w-100" placeholder="">
+                <label>Question Text</label>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-floating mb-3">
+                <select class="form-select answer-type">
+                  <option value="text">Text</option>
+                  <option value="radio">Multiple Choice</option>
+                  <option value="checkbox">Checkbox</option>
+                  <option value="dropdown">Dropdown</option>
+                </select>
+                <label>Answer Type</label>
+              </div>
+            </div>
+          </div>
+          <div class="option-container" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+  `;
     
-    empty_questions.forEach(function(emptyquestion){
-        let answerform=document.getElementById(`answer-type${emptyquestion.question_id}`);
-        let answer=document.getElementById(`answer${emptyquestion.question_id}`);
-        let update_form=document.getElementById(`update${emptyquestion.question_id}`);
-        let type=document.getElementById(`type${emptyquestion.question_id}`);
-        let question=document.getElementById(`question${emptyquestion.question_id}`)
-        let text=document.getElementById(`question_text${emptyquestion.question_id}`);
+  questionCounter++;
+  const card = container.querySelector('.card');
+  const qText = container.querySelector('.question-text');
+  const answerType = container.querySelector('.answer-type');
+  const optionContainer = container.querySelector('.option-container');
+  const addOptionBtn = container.querySelector('.add-option-btn');
 
-        if (answer && answerform) {  
-            answerform.addEventListener('change',function(){
-                type.value=answerform.value
-                text.value=question.value
-                if (answerform.value === "text"){                    
-                    answer.innerHTML=
-                        `<form>
-                            <input disabled class="form-control mx-auto w-auto inline-block" type="text">
-                        </form>`;
-                }
-                else {
-                    answer.innerHTML=
-                        `<form action="/addoption" method="post"> 
-                            <input type="hidden" name="type" value="${answerform.value}">
-                            <input type="hidden" name="qid" value="${emptyquestion.question_id}">
-                            <input type="hidden" name="form_id" value="${emptyquestion.form_id}">
-                            <button type="submit">Add Option</button> 
-                        </form>`;
-                    
-                }
-                update_form.submit()
-            });
-        }
-        if (answerform.value === "text"){
-            answer.innerHTML=
-                `<form>
-                    <input disabled class="form-control mx-auto w-auto inline-block" type="text">
-                </form>`;
-        }
-        else if (answerform.value === "radio" || answerform.value === "checkbox" ) {
-            answer.innerHTML=
-                `<form action="/addoption" method="post"> 
-                    <input type="hidden" name="type" value="${answerform.value}">
-                    <input type="hidden" name="qid" value="${emptyquestion.question_id}">
-                    <input type="hidden" name="form_id" value="${emptyquestion.form_id}">
-                    <button type="submit">Add Option</button> 
-                </form>`;
-        }
+  qText.addEventListener('input', e => {
+    question.text = e.target.value;
+    saveToSession();
+  });
+
+  answerType.addEventListener('change', e => {
+    question.answerType = e.target.value;
+    if (['radio', 'checkbox','dropdown'].includes(e.target.value)) {
+      optionContainer.style.display = 'block';
+      addOptionBtn.style.display = 'inline-block';
+      if (!Array.isArray(question.options)) question.options = [];
+    } else {
+      // Clear the options container when switching to text
+      optionContainer.innerHTML = '';
+      optionContainer.style.display = 'none';
+      addOptionBtn.style.display = 'none';
+      question.options = null;
+    }
+    saveToSession();
+  });
+
+  addOptionBtn.addEventListener('click', () => {
+    const optionText = '';
+    const opt = { id: Date.now(), text: optionText };
+    question.options.push(opt);
+    const index = question.options.length - 1;
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = createOptionHTML(question.id, index);
+    const input = wrapper.querySelector('.option-input');
+    input.addEventListener('input', e => {
+      opt.text = e.target.value;
+      saveToSession();
     });
-        
+    wrapper.querySelector('.remove-option-btn').addEventListener('click', () => {
+      question.options.splice(index, 1);
+      wrapper.remove();
+      saveToSession();
+    });
+    optionContainer.appendChild(wrapper);
+    saveToSession();
+  });
+
+  container.querySelector('.delete-btn').addEventListener('click', () => {
+    questions = questions.filter(q => q.id !== question.id);
+    container.remove();
+
+    updateNoQuestionsMessage();
+    saveToSession()
+  });
+
+  document.getElementById('questions-container').appendChild(container);
+  updateNoQuestionsMessage();
+
+    // Set initial values
+  qText.value = question.text;
+  answerType.value = question.answerType;
+
+  // Trigger answerType change manually to toggle option fields
+  answerType.dispatchEvent(new Event('change'));
+
+  // If there are options, render them
+  if (['radio', 'checkbox', 'dropdown'].includes(question.answerType) && Array.isArray(question.options)) {
+    question.options.forEach((opt, index) => {
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = createOptionHTML(question.id, index);
+      const input = wrapper.querySelector('.option-input');
+      input.value = opt.text;
+      input.addEventListener('input', e => opt.text = e.target.value);
+      wrapper.querySelector('.remove-option-btn').addEventListener('click', () => {
+        question.options.splice(index, 1);
+        wrapper.remove();
+      });
+      optionContainer.appendChild(wrapper);
+    });
+  }
+
+  // When initializing a question, check if we need to show the add option button
+  if (['radio', 'checkbox', 'dropdown'].includes(question.answerType)) {
+    addOptionBtn.style.display = 'inline-block';
+  }
+}
+
+// Add Question Event
+document.getElementById('add-question-btn').addEventListener('click', () => {
+  const newQuestion = { id: questionIdCounter++, text: '', answerType: 'text', options: null };
+  questions.push(newQuestion);
+  renderQuestion(newQuestion);
+  saveToSession();
+  
+  // Scroll to the newly added question
+  setTimeout(() => {
+    const lastQuestion = document.querySelector('#questions-container .row:last-child');
+    if (lastQuestion) {
+      lastQuestion.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, 100);
+});
+
+// Create Form Event Listener - Updated to use utils.js
+document.getElementById('create-form-btn').addEventListener('click', async () => {
+  console.log("Submitting Questions:", questions);
+  const formName = document.getElementById('form-name').value.trim();
+  const formTitle = document.getElementById('form-title').value.trim();
+  const formDescription = document.getElementById('form-description').value.trim();
+  // const restrict = document.getElementById('form-restrict').checked;
+
+  if (!formName || !formTitle) {
+    showError('Please fill in both form name and title');
+    return;
+  }
+
+  const payload = {
+    name: formName,
+    title: formTitle,
+    description: formDescription,
+    // restrict: restrict,
+    questions: questions
+  };
+
+  try {
+    const response = await makeRequest('/create', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+    if (result.success) {
+      clearSession();
+      showSuccess('Form created successfully!');
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1500);
+    } else {
+      showError('Failed to create form: ' + result.error);
+    }
+  } catch (error) {
+    console.error('Error creating form:', error);
+    showError('An error occurred while creating the form');
+  }
+});
+
+window.history.pushState({}, '');
+
+// Back Button Event: Clear sessionStorage for this specific form
+window.addEventListener('popstate', clearSession);
+
+window.addEventListener('pageshow', function(event) {
+  if (event.persisted) {
+    clearSession();
+  }
+});
+
+// Keep only the hover effect for slight visual feedback
+document.getElementById('floating-action-bar').addEventListener('mouseenter', function() {
+  this.style.transform = 'translateY(-50%) scale(1.05)';
+});
+
+document.getElementById('floating-action-bar').addEventListener('mouseleave', function() {
+  this.style.transform = 'translateY(-50%)';
+});
+
 </script>
-
-<script>
-    let written_questions = {{ writtenquestions | tojson }}
-    let Form = {{ form[0] | tojson }}
-    let name = document.getElementById("name")
-    let title = document.getElementById("title")
-    let create_form = document.getElementById("create")
-    let create_button = document.getElementById("create_button")
-    create_button.addEventListener('click',function(){
-        
-        if(name.value === "" || title.value === ""){
-            alert("form info incomplete");
-        }
-        else if(Form.question_count === 0 || written_questions.length === 0){
-            alert("No Questions in form, Add questions please ");
-        }
-        else{
-            create_form.submit()
-        }
-    })
-    </script>
-
-
-
 {% endblock %}

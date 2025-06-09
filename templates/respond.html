@@ -2,34 +2,161 @@
 
 {% block main %}
 
-<div>
-    <h3>{{ form.title }}</h3><hr>
-    <form action="/respond/{{form.form_id}}" method="post">
-        <div class="question-box">
-            <label class="h5 question">What is your Full name ?</label>
-            <input type="text" name="name" autocomplete="on" autofocus required title="Enter your full name" placeholder="Enter your full name"> 
-        </div>
-        {% for question in questions %}
-        <div class="question-box">
-            <label class="h5 question">{{question.question}}</label>
-            {% if question.answer_type == "text" %}
-                <input autofocus type="text" name="{{question.question_id}}" required placeholder="Enter your answer" title="Answer for {{question.question}}" >
-            {% else %}
-                {% for option in options %}
-                    {% if option.q_id == question.question_id %}
-                    <div class="mb-0">
-                        <input name="{{question.question_id}}" value="{{option.option}}" type="{{question.answer_type}}" id="opt{{option.option_id}}">
-                        <label for="opt{{option.option_id}}">{{option.option}}</label>
-                    </div>
-                    {% endif %}
-                {% endfor %}
+<div class="container respond-container text-start" style="max-width: 900px;">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white text-start">
+            <h3 class="mb-0">{{ form.title }}</h3>
+            {% if form.description %}
+            <p class="mb-0 mt-2 opacity-75">{{ form.description }}</p>
             {% endif %}
+            <!-- <small class="mt-2 d-block opacity-75">Please fill out all required fields</small> -->
         </div>
-        {% endfor %}
-        <input type="hidden" name="form_id" value="{{form.form_id}}">
-        <button class="btn btn-danger" type="submit">Submit</button>
-    </form>
+        
+        <div class="card-body respond-card-body p-4">
+            <form id="response-form" action="/respond/{{form.id}}" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                
+                <!-- Name Question -->
+                <!-- <div class="question-card mb-4">
+                    <div class="card border-start border-4 border-primary">
+                        <div class="card-body">
+                            <label class="form-label h5 text-primary mb-3">
+                                <i class="bi bi-person-fill me-2"></i>What is your Full name? <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" 
+                                   name="name" 
+                                   class="form-control form-control-lg" 
+                                   autocomplete="on" 
+                                   autofocus 
+                                   required 
+                                   title="Enter your full name" 
+                                   placeholder="Enter your full name">
+                        </div>
+                    </div>
+                </div> -->
 
+                <!-- Dynamic Questions -->
+                {% for question in questions %}
+                <div class="question-card mb-4">
+                    <div class="card border-start border-4 border-secondary">
+                        <div class="card-body">
+                            <label class="form-label h5 text-secondary mb-3">
+                                {{ question.text }}
+                            </label>
+                            
+                            {% if question.answerType == "text" %}
+                                <input type="text" 
+                                       name="{{question.id}}" 
+                                       class="form-control form-control-lg w-100" 
+                                       required 
+                                       placeholder="Enter your answer" 
+                                       title="Answer for {{question.text}}">
+                                       
+                            {% elif question.answerType == "radio" %}
+                                <div class="options-container">
+                                    {% for option in options_map[question.id] %}
+                                        <div class="form-check form-check-custom mb-3 w-50">
+                                            <input name="{{question.id}}" 
+                                                   value="{{option.text}}" 
+                                                   type="radio" 
+                                                   class="form-check-input" 
+                                                   id="opt{{option.id}}" 
+                                                   required>
+                                            <label class="form-check-label" for="opt{{option.id}}">
+                                                {{option.text}}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                
+                            {% elif question.answerType == "checkbox" %}
+                                <div class="options-container">
+                                    {% for option in options_map[question.id] %}
+                                        <div class="form-check form-check-custom mb-3 w-50">
+                                            <input name="{{question.id}}" 
+                                                   value="{{option.text}}" 
+                                                   type="checkbox" 
+                                                   class="form-check-input" 
+                                                   id="opt{{option.id}}">
+                                            <label class="form-check-label" for="opt{{option.id}}">
+                                                {{option.text}}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                
+                            {% elif question.answerType == "dropdown" %}
+                                <select name="{{question.id}}" 
+                                        class="form-select form-select-lg w-50" 
+                                        title="Select an option" 
+                                        required>
+                                    <option value="">Choose an option...</option>
+                                    {% for option in options_map[question.id] %}
+                                        <option value="{{option.text}}">{{option.text}}</option>
+                                    {% endfor %}
+                                </select>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Submit Section -->
+                <div class="text-center mt-5">
+                    <input type="hidden" name="form_id" value="{{form.id}}">
+                    <button class="btn btn-primary btn-submit-response" type="submit" id="submit-btn">
+                        <i class="bi bi-check-circle me-2"></i>Submit Response
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('response-form');
+    const submitBtn = document.getElementById('submit-btn');
+    let isSubmitting = false;
+    
+    // Prevent double submission
+    form.addEventListener('submit', function(e) {
+        if (isSubmitting) {
+            e.preventDefault();
+            return false;
+        }
+        
+        isSubmitting = true;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Submitting...';
+        
+        // If submission fails, re-enable the button after a delay
+        setTimeout(() => {
+            if (window.location.pathname.includes('/respond/')) {
+                isSubmitting = false;
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Submit Response';
+            }
+        }, 5000);
+    });
+    
+    // Warn user about leaving the page with unsaved data
+    let formModified = false;
+    const inputs = form.querySelectorAll('input, select, textarea');
+    
+    inputs.forEach(input => {
+        input.addEventListener('change', () => {
+            formModified = true;
+        });
+    });
+    
+    window.addEventListener('beforeunload', function(e) {
+        if (formModified && !isSubmitting) {
+            e.preventDefault();
+            e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        }
+    });
+});
+</script>
 
 {% endblock %}

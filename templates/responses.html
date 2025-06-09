@@ -1,76 +1,167 @@
-    {% extends "layout1.html" %}
+{% extends "layout1.html" %}
 
+{% block main %}
 
-    {% block main %}
+<div class="container">
+    <h3>Response Statistics to: {{ form.name }}</h3>
+    <!-- {% if form.description %}
+    <p class="text-muted mb-3"><em>{{ form.description }}</em></p>
+    {% endif %} -->
+    <hr>
+    {% for question in questions %}
+    <div class="question-box">
+        <label class="h5 question">{{question.text}}</label>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Answer</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for response in responses %}
+                {% if response.questionId == question.id %}
+                <tr>
+                    <td>{{response.responder_name}}</td>
+                    <td>{{response.answer}}</td>
+                    <td>{{response.createdAt or 'N/A'}}</td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table> 
 
-
-    <div>
-        <h3>Response Statistics to: {{ form.title }}</h3><hr>
-        {% for question in questions %}
-        <div class="question-box">
-            <label class="h5 question">{{question.question}}</label>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Answer</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for response in responses %}
-                    {% if response.q_id == question.question_id %}
-                    <tr>
-                        <td>{{response.responder_name}}</td>
-                        <td>{{response.answer}}</td>
-                        <td></td>
-                    </tr>
-                    {% endif %}
-                {% endfor %}
-                </tbody>
-            </table> 
-
-            {% if question.answer_type == "radio" %}
-                <!-- {% for option in option_answer_count %}
-                    {% if option.question_id == question.question_id %}
-                        <p>{{option.option}}----{{option.count}}</p>
-                    {% endif %}
-                {% endfor %} -->
-
-                <div id="chartsContainer-{{question.question_id}}" class="canvas" ></div>
-
-                 
-
-
-            {% endif %}
-        </div>
-        {% endfor %}
-
+        {% if question.answerType == "radio" or question.answerType == "dropdown" %}
+            <div id="chartsContainer-{{question.id}}" class="canvas my-4"></div>
+        {% elif question.answerType == "checkbox" %}
+            <div id="chartsContainer-{{question.id}}" class="canvas my-4"></div>
+        {% endif %}
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        let options = {{ option_answer_count | tojson }};
-        let Questions= {{ questions | tojson}}
+    {% endfor %}
+</div>
 
-        Questions.forEach(function(Question){
-            if (Question.answer_type !== "text"){
-                let filteredOptions = options.filter(option => option.question_id === Question.question_id);
-                if (filteredOptions.length > 0) {
-                    let labels = filteredOptions.map(option => option.option);
-                    let data = filteredOptions.map(option => option.count);
-                    let backgroundColors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'];
+<script>
+    // Use Chart.js for visualization with error handling
+    document.addEventListener('DOMContentLoaded', function() {
+        // try {
+            let options = {{ option_answer_count | tojson }};
+            let Questions = {{ questions | tojson}};
 
-                    let canvas = document.createElement('canvas');
-                    document.getElementById(`chartsContainer-${Question.question_id}`).appendChild(canvas);
+            Questions.forEach(function(Question){
+                if (Question.answerType !== "text"){
+                    let filteredOptions = options.filter(option => option.question_id === Question.id);
+                    if (filteredOptions.length > 0) {
+                        let labels = filteredOptions.map(option => option.option);
+                        let data = filteredOptions.map(option => option.count);
+                        let backgroundColors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#C9CBCF', '#4BC0C0'];
 
-                    new Chart(canvas.getContext('2d'), {
-                        type: 'pie',
-                        data: {labels: labels, datasets: [{data: data,backgroundColor: backgroundColors.slice(0, labels.length)}]},
-                        options: {plugins: {title: {display: true,text: "Chart"}}}
-                    });
+                        let canvas = document.createElement('canvas');
+                        const container = document.getElementById(`chartsContainer-${Question.id}`);
+                        
+                        if (container) {
+                            container.appendChild(canvas);
+
+                            // Determine chart type based on question type
+                            let chartType;
+                            let chartOptions;
+
+                            if (Question.answerType === "checkbox") {
+                                // Bar chart for checkbox questions
+                                chartType = 'bar';
+                                chartOptions = {
+                                    responsive: true,
+                                    plugins: {
+                                        title: {
+                                            display: true,
+                                            text: `Response Distribution: ${Question.text}`,
+                                            font: {
+                                                size: 16
+                                            }
+                                        },
+                                        legend: {
+                                            display: false // Hide legend for bar chart
+                                        }
+                                    },
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true,
+                                            ticks: {
+                                                stepSize: 1
+                                            },
+                                            title: {
+                                                display: true,
+                                                text: 'Number of Responses'
+                                            }
+                                        },
+                                        x: {
+                                            title: {
+                                                display: true,
+                                                text: 'Options'
+                                            }
+                                        }
+                                    }
+                                };
+                            } else {
+                                // Pie chart for radio and dropdown questions
+                                chartType = 'pie';
+                                chartOptions = {
+                                    responsive: true,
+                                    plugins: {
+                                        title: {
+                                            display: true,
+                                            text: `Response Distribution: ${Question.text}`,
+                                            font: {
+                                                size: 16
+                                            }
+                                        },
+                                        legend: {
+                                            position: 'bottom',
+                                            labels: {
+                                                padding: 20,
+                                                usePointStyle: true
+                                            }
+                                        },
+                                        tooltip: {
+                                            callbacks: {
+                                                label: function(context) {
+                                                    const total = context.dataset.data.reduce((sum, value) => sum + value, 0);
+                                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                                    return `${context.label}: ${context.parsed} (${percentage}%)`;
+                                                }
+                                            }
+                                        }
+                                    }
+                                };
+                            }
+
+                            new Chart(canvas.getContext('2d'), {
+                                type: chartType,
+                                data: {
+                                    labels: labels, 
+                                    datasets: [{
+                                        data: data,
+                                        backgroundColor: backgroundColors.slice(0, labels.length),
+                                        borderColor: chartType === 'bar' ? backgroundColors.slice(0, labels.length) : '#fff',
+                                        borderWidth: chartType === 'bar' ? 1 : 2
+                                    }]
+                                },
+                                options: chartOptions
+                            });
+                        }
+                    }
                 }
-            }
-        });
-    </script>
+            });
+        // } catch (error) {
+        //     console.error('Error creating charts:', error);
+        //     if (window.showError) {
+        //         showError('Failed to load response charts');
+        //     }
+        // }
+    });
+</script>
 
-    {% endblock %}
+{% endblock %}
+
+
+

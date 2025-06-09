@@ -1,0 +1,142 @@
+{% extends "layout2.html" %}
+
+{% block title %}Response Submitted{% endblock %}
+
+{% block main %}
+
+<div class="container" style="max-width: 600px;">
+    <div class="card shadow-lg border-0">
+        <div class="card-body text-center py-5">
+            <!-- Success Icon -->
+            <div class="mb-4">
+                <div class="success-icon-container">
+                    <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+                </div>
+            </div>
+            
+            <!-- Success Message -->
+            <h2 class="text-success mb-3">Response Submitted Successfully!</h2>
+            <p class="text-muted mb-4">
+                Thank you for taking the time to complete <strong>"{{ form.title }}"</strong>.
+                {% if form.description %}
+                <br><em>{{ form.description }}</em>
+                {% endif %}
+                Your response has been recorded and is greatly appreciated.
+            </p>
+            
+            <!-- Form Details -->
+            <div class="card bg-light border-0 mb-4">
+                <div class="card-body">
+                    <div class="row text-start">
+                        <div class="col-sm-6">
+                            <small class="text-muted">Form:</small>
+                            <div class="fw-medium">{{ form.title }}</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <small class="text-muted">Submitted:</small>
+                            <div class="fw-medium">{{ submission_time }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Info Message -->
+            <div class="alert alert-info border-0">
+                <i class="bi bi-info-circle me-2"></i>
+                You cannot submit another response to this form. If you need to make changes, please contact the form administrator.
+            </div>
+            
+            <!-- Action Button -->
+            <div class="mt-4">
+                <a href="/" class="btn btn-primary btn-lg">
+                    <i class="bi bi-house-door me-2"></i>Return to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.success-icon-container {
+    animation: successPulse 2s ease-in-out;
+}
+
+@keyframes successPulse {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.card {
+    border-radius: 15px;
+}
+
+/* Dark mode support */
+.dark-mode .card {
+    background-color: #2d3748;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .bg-light {
+    background-color: #374151 !important;
+}
+
+.dark-mode .alert-info {
+    background-color: #1e3a8a;
+    border-color: #3b82f6;
+    color: #dbeafe;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Prevent back navigation to the form
+    history.pushState(null, null, location.href);
+    
+    // Handle back button attempts
+    window.addEventListener('popstate', function(event) {
+        history.pushState(null, null, location.href);
+        
+        // Show a friendly message when user tries to go back
+        if (window.showError) {
+            showError('You cannot go back to the form after submitting your response.');
+        } else {
+            alert('You cannot go back to the form after submitting your response.');
+        }
+    });
+    
+    // Prevent form resubmission on page refresh
+    if (performance.navigation.type === performance.navigation.TYPE_RELOAD) {
+        window.location.href = '/';
+    }
+    
+    // Clear any form data from session storage
+    const keys = Object.keys(sessionStorage);
+    keys.forEach(key => {
+        if (key.startsWith('formResponse_') || key.startsWith('draftForm_')) {
+            sessionStorage.removeItem(key);
+        }
+    });
+});
+
+// Override browser refresh
+window.addEventListener('beforeunload', function(e) {
+    // Don't show confirmation dialog, just redirect
+    setTimeout(() => {
+        if (window.location.pathname.includes('/response-submitted')) {
+            window.location.href = '/';
+        }
+    }, 100);
+});
+</script>
+
+{% endblock %}
