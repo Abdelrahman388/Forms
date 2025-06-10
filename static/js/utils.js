@@ -163,12 +163,7 @@ function showSuccess(message) {
     }
 }
 
-/**
- * Make an AJAX request with CSRF protection
- * @param {string} url - Request URL
- * @param {Object} options - Request options
- * @returns {Promise<Response>} Fetch response
- */
+
 async function makeRequest(url, options = {}) {
     const defaultOptions = {
         method: 'GET',
