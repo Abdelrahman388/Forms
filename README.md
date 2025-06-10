@@ -1,5 +1,5 @@
-# Dynamic Forms Creator - CS50x Final Project
-#### Video Demo: <URL HERE>
+# Dynamic Forms Creator 
+#### Video Demo: https://youtu.be/sIuERcdjDkQ
 
 ## Description
 
@@ -71,7 +71,7 @@ I integrated Chart.js for data visualization, choosing different chart types bas
 The application includes CSRF protection, secure password hashing, SQL injection prevention through ORM usage, and proper input validation. User authorization ensures users can only access their own forms and data.
 
 ### User Experience
-The interface features a modern, responsive design with smooth animations, dark/light theme support, and intuitive navigation. The form builder includes real-time preview, drag-and-drop-style interactions, and clear visual feedback for all actions.
+The interface features a modern, responsive design with smooth animations, dark/light theme support, and intuitive navigation. The form builder includes real-time preview and clear visual feedback for all actions.
 
 ## Technical Implementation Highlights
 
