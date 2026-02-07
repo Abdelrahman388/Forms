@@ -23,6 +23,10 @@
                 z-index: 1030; /* Higher z-index ensures navbar stays on top */
             }
             
+            .container-fluid {
+                padding-left: 5%;
+                padding-right: 5%;
+            }
             /* Add padding to main content to prevent overlap with sticky navbar */
             main {
                 padding-top: 1rem;
@@ -55,17 +59,6 @@
                 </div>
             </div>
         </nav>
-
-        {% if get_flashed_messages() %}
-            <div class="container mt-3">
-                {% for category, message in get_flashed_messages(with_categories=true) %}
-                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
 
         <main class="container-fluid py-4 text-start">
             {% block main %}{% endblock %}
@@ -103,10 +96,22 @@
                 // Make FormsUtils globally available for templates
                 if (window.FormsUtils) {
                     window.showError = FormsUtils.showError;
+                    window.showInfo = FormsUtils.showInfo;
                     window.showSuccess = FormsUtils.showSuccess;
                     window.makeRequest = FormsUtils.makeRequest;
                     window.getCSRFToken = FormsUtils.getCSRFToken;
                 }
+                
+                // Show flash messages using toast notifications
+                {% for category, message in get_flashed_messages(with_categories=true) %}
+                    {% if category == 'error' or category == 'danger' %}
+                        FormsUtils.showError("{{ message }}");
+                    {% elif category == 'success' %}
+                        FormsUtils.showSuccess("{{ message }}");
+                    {% else %}
+                        FormsUtils.showInfo("{{ message }}");
+                    {% endif %}
+                {% endfor %}
             });
         </script>
     </body>

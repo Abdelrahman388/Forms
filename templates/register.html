@@ -60,19 +60,19 @@ document.addEventListener("DOMContentLoaded", function() {
     // Show form errors using toast notifications
     {% if form.username.errors %}
         {% for error in form.username.errors %}
-            FormsUtils.showError(error);
+            windows.showError(error);
         {% endfor %}
     {% endif %}
     
     {% if form.password.errors %}
         {% for error in form.password.errors %}
-            FormsUtils.showError(error);
+            windows.showError(error);
         {% endfor %}
     {% endif %}
     
     {% if form.confirmation.errors %}
         {% for error in form.confirmation.errors %}
-            FormsUtils.showError(error);
+            windows.showError(error);
         {% endfor %}
     {% endif %}
 
