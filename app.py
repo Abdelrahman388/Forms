@@ -6,6 +6,8 @@ from sqlalchemy import text
 from flask_wtf.csrf import CSRFProtect
 from flask_login import LoginManager
 
+from decouple import config
+
 from index import home_bp 
 from auth import auth_bp
 from builder import builder_bp
@@ -114,4 +116,5 @@ def internal_error(error):
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # app.run(debug=True)
+    app.run(host=config('HOST'), port=config('PORT'))
