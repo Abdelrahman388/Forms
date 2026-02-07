@@ -1,0 +1,22 @@
+name: Deploy
+on:
+  push:
+    branches:
+      - main  # Only deploy when pushing to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH and Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VM_IP }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/server-management/Forms
+            git pull origin main
+            cd ..
+            # Rebuild only the portfolio container
+            sudo docker compose up -d --build froms
