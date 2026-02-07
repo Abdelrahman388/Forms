@@ -79,6 +79,12 @@ function createAlert(message, type) {
                 color: white;
             }
             
+            body.dark-mode .alert-info {
+                background-color: rgba(13, 110, 253, 0.9);
+                border-color: rgba(13, 110, 253, 0.5);
+                color: white;
+            }
+
             body.dark-mode .alert-success {
                 background-color: rgba(25, 135, 84, 0.9);
                 border-color: rgba(25, 135, 84, 0.5);
@@ -102,6 +108,38 @@ function createAlert(message, type) {
 function showError(message) {
     const container = createToastContainer();
     const alert = createAlert(message, 'danger');
+    
+    container.appendChild(alert);
+    
+    // Auto-dismiss after 5 seconds with animation
+    setTimeout(() => {
+        if (alert.parentNode) {
+            alert.classList.add('alert-slide-out');
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+            }, 300);
+        }
+    }, 5000);
+    
+    // Handle manual close button
+    const closeBtn = alert.querySelector('.btn-close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            alert.classList.add('alert-slide-out');
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+            }, 300);
+        });
+    }
+}
+
+function showInfo(message) {
+    const container = createToastContainer();
+    const alert = createAlert(message, 'info');
     
     container.appendChild(alert);
     
@@ -185,6 +223,7 @@ async function makeRequest(url, options = {}) {
 window.FormsUtils = {
     getCSRFToken,
     showError,
+    showInfo,
     showSuccess,
     makeRequest
 };
